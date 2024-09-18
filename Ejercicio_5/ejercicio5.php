@@ -11,4 +11,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     echo "Comentario guardado exitosamente.";
 }
-?>
