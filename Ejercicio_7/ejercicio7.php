@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ejercicio 7</title>
+    <style>
+        .error {color: #FF0000;}
+    </style>
 </head>
 <body>
     <?php
@@ -17,7 +20,7 @@
                 $nombreError = "El nombre es necesario";
             } else {
                 $nombre = ajustarEntrada($_POST["nombre"]);
-                if (!preg_match("/^[a-zA-Z-' ]*$/",$name)) {
+                if (!preg_match("/^[a-zA-Z-' ]*$/",$nombre)) {
                     $nombreError = "Sólo se permiten letras y espacios";
                 }
             }
@@ -41,9 +44,9 @@
             }
 
             if (empty($_POST["confirm_pwd"])) {
-                $confirm_pwdError = "La contraseña es necesaria";
+                $confirm_pwdError = "La confirmación es necesaria";
             } else {
-                $confirm_pwd = $_POST["confirm_pwd"];
+                $confirm_pwd = ajustarEntrada($_POST["confirm_pwd"]);
                 if ($confirm_pwd != $pwd) {
                     $confirm_pwdError = "No coinciden las contraseñas.";
                 }
@@ -51,34 +54,41 @@
         }
 
         function ajustarEntrada($value) {
-            $value = trim($value);
-            $value = stripslashes($value);
-            $value = htmlspecialchars($value);
-            return $value;
+            return htmlspecialchars(stripslashes(trim($value)));
         }
     ?>
+
     <h2>Formulario de registro con validación</h2>
     <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">  
-        Nombre: <input type="name" id="nombre" name="nombre">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" value="<?php echo $nombre;?>">
         <span class="error">* <?php echo $nombreError;?></span>
         <br><br>
-        Correo electrónico: <input type="name" id="email" name="email">
+        
+        <label for="email">Correo electrónico:</label>
+        <input type="email" id="email" name="email" value="<?php echo $email;?>">
         <span class="error">* <?php echo $emailError;?></span>
         <br><br>
-        Contraseña: <input type="password" id="pwd" name="pwd">
+        
+        <label for="pwd">Contraseña:</label>
+        <input type="password" id="pwd" name="pwd">
         <span class="error">* <?php echo $pwdError;?></span>
         <br><br>
-        Confirmar Contraseña: <input type="password" id="confirm_pwd" name="pwd">
+        
+        <label for="confirm_pwd">Confirmar Contraseña:</label>
+        <input type="password" id="confirm_pwd" name="confirm_pwd">
         <span class="error">* <?php echo $confirm_pwdError;?></span>
         <br><br>
+
         <input type="submit" id="button" value="Enviar">
     </form>
 
     <?php
-        echo "<h2>Datos:</h2>";
-        echo $nombre;
-        echo "<br>";
-        echo $email;
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($nombreError) && empty($emailError) && empty($pwdError) && empty($confirm_pwdError)) {
+            echo "<h2>Datos registrados:</h2>";
+            echo "Nombre: $nombre<br>";
+            echo "Email: $email<br>";
+        }
     ?>
 
 </body>
