@@ -20,7 +20,7 @@
                 $nombreError = "El nombre es necesario";
             } else {
                 $nombre = ajustarEntrada($_POST["nombre"]);
-                if (!preg_match("/^[a-zA-Z-' ]*$/",$nombre)) {
+                if (!preg_match("/^[a-zA-Z-'\s]+$/",$nombre)) {
                     $nombreError = "Sólo se permiten letras y espacios";
                 }
             }
