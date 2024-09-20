@@ -34,15 +34,20 @@
         $email = $_POST["email"];
         $password = $_POST["pwd"];
         $confirm_password = $_POST["confirm_pwd"];
-        if ($password !== $confirm_password) {
-            echo "No coinciden las contraseñas<br>";
-        } else {
-            echo "Coinciden las contraseñas<br>";
-            $usuario = new Usuario($username,$email,$password);
-            echo "Datos introducidos: <br>
-            Usuario: ".$usuario->get_name()."<br>
-            Email: ".$usuario->get_email()."<br>";
+        if ($_SERVER['REQUEST_METHOD'] == "POST") {
+            if ($password !== $confirm_password) {
+                echo "No coinciden las contraseñas<br>";
+            } else if (!isset($password) || !isset($confirm_password)) {
+                echo "Error. El campo de contraseña no debe estar vacío <br>";
+            } else {
+                echo "Coinciden las contraseñas<br>";
+                $usuario = new Usuario($username,$email,$password);
+                echo "Datos introducidos: <br>
+                Usuario: ".$usuario->get_name()."<br>
+                Email: ".$usuario->get_email()."<br>";
+            }
         }
+        
     ?>
 </body>
 </html>
