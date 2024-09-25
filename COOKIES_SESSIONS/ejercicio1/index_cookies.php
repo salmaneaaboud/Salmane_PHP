@@ -35,7 +35,7 @@
     if ($cookie_value == 0) {
         echo "Es tu primera visita";
     } else {
-        echo "Es tu visita número " . $cookie_value;
+        echo "Es tu visita número " . ($cookie_value+1);
     }
     ?>
 </body>
