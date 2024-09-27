@@ -11,10 +11,10 @@ $bienvenidaEuskara = 'Ongi etorri!';
 $bienvenidaCastellano = '¡Bienvenido!';
 
 if ($tema === 'Oscuro') {
-    $backgroundColor = '#000';
+    $backgroundClass = 'bg-gradient-dark'; 
     $textColor = '#FFF';
 } else {
-    $backgroundColor = '#FFF';
+    $backgroundClass = 'bg-gradient-light'; 
     $textColor = '#000';
 }
 ?>
@@ -29,20 +29,29 @@ if ($tema === 'Oscuro') {
     <title>Ejercicio 3</title>
     <style>
         body {
-            background-color: <?php echo $backgroundColor; ?>;
             color: <?php echo $textColor; ?>;
+        }
+
+        .bg-gradient-light {
+            background: linear-gradient(to right, #C9D6FF, #E2E2E2); 
+        }
+
+        .bg-gradient-dark {
+            background: linear-gradient(to right, #000000, #434343); 
         }
     </style>
 </head>
 
-<body>
-    <div class="container mt-5">
+<body class=<?php echo $backgroundClass;?>>
+    <div class="container mt-5 py-5">
         <div class="row justify-content-center">
             <div class="col-md-6 text-center">
                 <h1>
-                    <?php if (!isset($_COOKIE['idioma'])) echo "$bienvenidaEuskara / $bienvenidaCastellano";
+                    <?php 
+                    if (!isset($_COOKIE['idioma'])) echo "$bienvenidaEuskara / $bienvenidaCastellano";
                     elseif ($idioma=='Euskara') echo $bienvenidaEuskara;
-                    else echo $bienvenidaCastellano;?>
+                    else echo $bienvenidaCastellano;
+                    ?>
                 </h1>
             </div>
         </div>
