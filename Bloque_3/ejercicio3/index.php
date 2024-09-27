@@ -44,7 +44,7 @@ if ($tema === 'Oscuro') {
 
 <body class=<?php echo $backgroundClass;?>>
     <div class="container mt-5 py-5">
-        <div class="row justify-content-center">
+        <div class="row justify-content-center mb-3">
             <div class="col-md-6 text-center">
                 <h1>
                     <?php 
