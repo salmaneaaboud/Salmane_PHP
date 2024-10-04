@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ejercicio 7</title>
     <style>
-        .error {color: #FF0000;}
+        .error { color: #FF0000; }
     </style>
 </head>
 <body>
@@ -14,13 +14,13 @@
         $nombre = $email = $pwd = $confirm_pwd = "";
         $patron = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*!])[A-Za-z\d@#$%^&*!]{6,}$/";
 
-        if($_SERVER["REQUEST_METHOD"] == "POST") {
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             if (empty($_POST["nombre"])) {
                 $nombreError = "El nombre es necesario";
             } else {
                 $nombre = ajustarEntrada($_POST["nombre"]);
-                if (!preg_match("/^[a-zA-Z-'\s]+$/",$nombre)) {
+                if (!preg_match("/^[a-zA-Z-'\s]+$/", $nombre)) {
                     $nombreError = "Sólo se permiten letras y espacios";
                 }
             }
@@ -29,7 +29,7 @@
                 $emailError = "El email es necesario";
             } else {
                 $email = ajustarEntrada($_POST["email"]);
-                if (!filter_var($email,FILTER_VALIDATE_EMAIL)) {
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $emailError = "Error al introducir el email";
                 }
             }
@@ -38,7 +38,7 @@
                 $pwdError = "La contraseña es necesaria";
             } else {
                 $pwd = ajustarEntrada($_POST["pwd"]);
-                if (!preg_match($patron,$pwd)) {
+                if (!preg_match($patron, $pwd)) {
                     $pwdError = "La contraseña no cumple con los requisitos";
                 }
             }
@@ -63,12 +63,18 @@
                     die("Connection failed: " . $conn->connect_error);
                 }
 
-                $sql = "INSERT INTO users (nombre, email, contrasena) VALUES ('$nombre', '$email', '$pwd')";
-                
-                if ($conn->query($sql)) {
-                    header('Location: bienvenido.php');
+                $sql = "SELECT * FROM users WHERE email='$email'";
+                $result = $conn->query($sql);
+                if ($result->num_rows > 0) {
+                    $emailError = "Ya existe una cuenta con este correo electrónico.";
                 } else {
-                    echo "<p style='color:red;'>Ya existe el usuario.</p>";
+                    $sql = "INSERT INTO users (nombre, email, contrasena) VALUES ('$nombre', '$email', '$pwd')";
+                    if ($conn->query($sql) === TRUE) {
+                        header('Location: bienvenido.php');
+                        exit();
+                    } else {
+                        echo "<p style='color:red;'>Error al registrar el usuario: " . $conn->error . "</p>";
+                    }
                 }
 
                 $conn->close();
