@@ -6,7 +6,7 @@ $username = "root";
 $password = "root";
 $dbname = "mydatabase";
 
-$login_email = $_POST['email'];
+$login_name = $_POST['username'];
 $login_password = $_POST['password'];
 
 
@@ -15,7 +15,7 @@ if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT nombre FROM users WHERE email = '$login_email' AND contrasena = '$login_password'";
+$sql = "SELECT nombre FROM users WHERE nombre = '$login_name' AND contrasena = '$login_password'";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {

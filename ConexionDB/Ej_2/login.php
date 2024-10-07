@@ -17,8 +17,8 @@
 
 
     <form method="post" action="login_conexionDB.php">
-        <label for="email">Usuario:</label>
-        <input type="email" id="email" name="email" required>
+        <label for="name">Nombre de usuario:</label>
+        <input type="text" id="username" name="username" required>
         <br><br>
         <label for="password">Contraseña:</label>
         <input type="password" id="password" name="password" required>

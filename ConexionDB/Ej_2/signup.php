@@ -63,10 +63,10 @@
                     die("Connection failed: " . $conn->connect_error);
                 }
 
-                $sql = "SELECT * FROM users WHERE email='$email'";
+                $sql = "SELECT * FROM users WHERE email='$email' OR nombre='$nombre'";
                 $result = $conn->query($sql);
                 if ($result->num_rows > 0) {
-                    $emailError = "Ya existe una cuenta con este correo electrónico.";
+                    echo "Ya existe una cuenta con este correo electrónico o nombre.";
                 } else {
                     $sql = "INSERT INTO users (nombre, email, contrasena) VALUES ('$nombre', '$email', '$pwd')";
                     if ($conn->query($sql) === TRUE) {
