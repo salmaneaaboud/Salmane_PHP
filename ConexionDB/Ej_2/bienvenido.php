@@ -6,11 +6,9 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-// VARIABLES_ERRORES
-$nombreErr = $isanErr = $anioErr = $valoracionErr = '';
-
 // VARIABLES
 $nombre = $isan = $anio = $valoracion = '';
+$mensajeError = '';
 
 // VARIABLES_DB
 $servername = "db";
@@ -37,12 +35,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $nombreUsuario = $_SESSION['username'];
 
-    if (empty($isan)) {
-        echo "El campo ISAN es obligatorio.";
-        return;
+    if (empty($isan) || strlen($isan) !== 8) {
+        $mensajeError = "El campo ISAN es obligatorio y debe tener exactamente 8 dígitos.";
     }
 
-    if (!empty($nombre) && !empty($anio) && !empty($valoracion)) {
+    if (empty($anio)) {
+        $mensajeError .= "<br>El campo Año es obligatorio.";
+    }
+
+    if (empty($valoracion)) {
+        $mensajeError .= "<br>El campo Puntuación es obligatorio.";
+    }
+
+    if (empty($mensajeError)) {
         $sql_select_isan = "SELECT * FROM peliculasUsuario WHERE ISAN = '$isan'";
         $result_select = $conn->query($sql_select_isan);
 
@@ -51,21 +56,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             actualizarPelicula($conn, $valoracion, $anio, $isan);
         }
-    } elseif (empty($nombre) && !empty($isan)) {
-        eliminarPelicula($conn, $nombreUsuario, $isan);
     }
 }
 
 function insertarPelicula($conn, $nombreUsuario, $isan, $nombre, $valoracion, $anio) {
-    if ($isan > 9999999) {
-        $sql_insert = "INSERT INTO peliculasUsuario (nombre, ISAN, nombre_pelicula, puntuacion, ano) VALUES ('$nombreUsuario', '$isan', '$nombre', '$valoracion', '$anio')";
-        if ($conn->query($sql_insert) === TRUE) {
-            echo "Película insertada correctamente";
-        } else {
-            echo "Error: " . $sql_insert . "<br>" . $conn->error;
-        }
+    $sql_insert = "INSERT INTO peliculasUsuario (nombre, ISAN, nombre_pelicula, puntuacion, ano) VALUES ('$nombreUsuario', '$isan', '$nombre', '$valoracion', '$anio')";
+    if ($conn->query($sql_insert) === TRUE) {
+        echo "Película insertada correctamente";
     } else {
-        echo "El ISAN debe tener 8 dígitos.";
+        echo "Error: " . $sql_insert . "<br>" . $conn->error;
     }
 }
 
@@ -75,15 +74,6 @@ function actualizarPelicula($conn, $valoracion, $anio, $isan) {
         echo "Película actualizada correctamente";
     } else {
         echo "Error: " . $sql_update . "<br>" . $conn->error;
-    }
-}
-
-function eliminarPelicula($conn, $nombreUsuario, $isan) {
-    $sql_delete = "DELETE FROM peliculasUsuario WHERE ISAN = '$isan' AND nombre = '$nombreUsuario'";
-    if ($conn->query($sql_delete) === TRUE) {
-        echo "Se ha borrado la película";
-    } else {
-        echo "Error: " . $sql_delete . "<br>" . $conn->error;
     }
 }
 
@@ -114,10 +104,10 @@ function eliminarPelicula($conn, $nombreUsuario, $isan) {
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) { 
                         echo "<tr>
-                        <td>".$row['ISAN']."</td>
-                        <td>".$row['nombre_pelicula']."</td>
-                        <td>".$row['puntuacion']."</td>
-                        <td>".$row['ano']."</td>
+                        <td>".htmlspecialchars($row['ISAN'])."</td>
+                        <td>".htmlspecialchars($row['nombre_pelicula'])."</td>
+                        <td>".htmlspecialchars($row['puntuacion'])."</td>
+                        <td>".htmlspecialchars($row['ano'])."</td>
                         </tr>";
                     }
                 }
@@ -127,27 +117,24 @@ function eliminarPelicula($conn, $nombreUsuario, $isan) {
     <br>
     <div id="agregar_pelicula">
         <h3>Agregar película</h3>
+        <?php if (!empty($mensajeError)) echo "<div class='error'>$mensajeError</div>"; ?>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
             <table>
                 <tr>
                     <td><label for="nombre">Nombre: </label></td>
-                    <td><input type="text" name="nombre" id="nombre" value="<?php echo htmlspecialchars($nombre); ?>">
-                    <span class="error">* <?php echo $nombreErr; ?></span></td>
+                    <td><input type="text" name="nombre" id="nombre" value="<?php echo htmlspecialchars($nombre); ?>"></td>
                 </tr>
                 <tr>
                     <td><label for="ISAN">ISAN: </label></td>
-                    <td><input type="text" name="ISAN" id="ISAN" value="<?php echo htmlspecialchars($isan); ?>">
-                    <span class="error">* <?php echo $isanErr; ?></span></td>
+                    <td><input type="text" name="ISAN" id="ISAN" value="<?php echo htmlspecialchars($isan); ?>"></td>
                 </tr>
                 <tr>
                     <td><label for="anio">Año: </label></td>
-                    <td><input type="text" name="anio" id="anio" value="<?php echo htmlspecialchars($anio); ?>">
-                    <span class="error">* <?php echo $anioErr; ?></span></td>
+                    <td><input type="text" name="anio" id="anio" value="<?php echo htmlspecialchars($anio); ?>"></td>
                 </tr>
                 <tr>
                     <td><label for="puntuacion">Puntuación: </label></td>
-                    <td><input type="number" min="0" max="5" name="puntuacion" id="puntuacion" value="<?php echo htmlspecialchars($valoracion); ?>">
-                    <span class="error">* <?php echo $valoracionErr; ?></span></td>
+                    <td><input type="number" min="0" max="5" name="puntuacion" id="puntuacion" value="<?php echo htmlspecialchars($valoracion); ?>"></td>
                 </tr>
             </table>
             <input type="submit" value="Agregar película">
