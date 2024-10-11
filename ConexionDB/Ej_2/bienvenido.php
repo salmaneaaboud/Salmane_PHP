@@ -24,50 +24,69 @@ if ($conn->connect_error) {
 }
 
 if (isset($_SESSION['username'])) {
-    $nombre = $_SESSION['username'];
-    $sql_1 = "SELECT * FROM peliculasUsuario WHERE nombre='$nombre'";
-    $result = $conn->query($sql);
+    $nombreUsuario = $_SESSION['username'];
+    $sql_nombre = "SELECT * FROM peliculasUsuario WHERE nombre='$nombreUsuario'";
+    $result = $conn->query($sql_nombre);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $sql_2 = "SELECT * FROM peliculasUsuario WHERE ISAN = '$isan'";
-    $result_2 = $conn->query($sql_2);
+    $nombre = !empty($_POST['nombre']) ? $_POST['nombre'] : '';
+    $isan = !empty($_POST['ISAN']) ? $_POST['ISAN'] : '';
+    $anio = !empty($_POST['anio']) ? $_POST['anio'] : '';
+    $valoracion = !empty($_POST['puntuacion']) ? $_POST['puntuacion'] : '';
 
-    /** 
-    if (empty($_POST["nombre"])) {
-        $nombreErr = "El campo 'Nombre' no debe quedar vacío";
-    } else {
-        $nombre = $_POST["nombre"];
+    $nombreUsuario = $_SESSION['username'];
+
+    if (empty($isan)) {
+        echo "El campo ISAN es obligatorio.";
+        return;
     }
 
-    if (empty($_POST["ISAN"])) {
-        $isanErr = "El campo 'ISAN' no debe quedar vacío";
-    } else {
-        $isan = $_POST["ISAN"];
-    }
+    if (!empty($nombre) && !empty($anio) && !empty($valoracion)) {
+        $sql_select_isan = "SELECT * FROM peliculasUsuario WHERE ISAN = '$isan'";
+        $result_select = $conn->query($sql_select_isan);
 
-    if (empty($_POST["anio"])) {
-        $anioErr = "El campo 'Año' no debe quedar vacío";
-    } else {
-        $anio = $_POST["anio"];
-    }
-
-    if (empty($_POST["puntuacion"])) {
-        $valoracionErr = "El campo 'Puntuación' no debe quedar vacío";
-    } else {
-        $valoracion = $_POST["puntuacion"];
-    } 
-
-    if (empty($nombreErr) && empty($isanErr) && empty($anioErr) && empty($valoracionErr)) {
-        
-    } */
-
-    if ($result_2->num_rows == 0 && $isan > 9999999) {
-
-    } else {
-        $sql_3 = "INSERT INTO peliculasUsuario VALUES ('$isan')";
+        if ($result_select->num_rows == 0) {
+            insertarPelicula($conn, $nombreUsuario, $isan, $nombre, $valoracion, $anio);
+        } else {
+            actualizarPelicula($conn, $valoracion, $anio, $isan);
+        }
+    } elseif (empty($nombre) && !empty($isan)) {
+        eliminarPelicula($conn, $nombreUsuario, $isan);
     }
 }
+
+function insertarPelicula($conn, $nombreUsuario, $isan, $nombre, $valoracion, $anio) {
+    if ($isan > 9999999) {
+        $sql_insert = "INSERT INTO peliculasUsuario (nombre, ISAN, nombre_pelicula, puntuacion, ano) VALUES ('$nombreUsuario', '$isan', '$nombre', '$valoracion', '$anio')";
+        if ($conn->query($sql_insert) === TRUE) {
+            echo "Película insertada correctamente";
+        } else {
+            echo "Error: " . $sql_insert . "<br>" . $conn->error;
+        }
+    } else {
+        echo "El ISAN debe tener 8 dígitos.";
+    }
+}
+
+function actualizarPelicula($conn, $valoracion, $anio, $isan) {
+    $sql_update = "UPDATE peliculasUsuario SET puntuacion = '$valoracion', ano = '$anio' WHERE ISAN = '$isan'";
+    if ($conn->query($sql_update) === TRUE) {
+        echo "Película actualizada correctamente";
+    } else {
+        echo "Error: " . $sql_update . "<br>" . $conn->error;
+    }
+}
+
+function eliminarPelicula($conn, $nombreUsuario, $isan) {
+    $sql_delete = "DELETE FROM peliculasUsuario WHERE ISAN = '$isan' AND nombre = '$nombreUsuario'";
+    if ($conn->query($sql_delete) === TRUE) {
+        echo "Se ha borrado la película";
+    } else {
+        echo "Error: " . $sql_delete . "<br>" . $conn->error;
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
