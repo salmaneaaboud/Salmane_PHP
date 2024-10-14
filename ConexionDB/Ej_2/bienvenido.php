@@ -8,7 +8,7 @@ if (!isset($_SESSION['username'])) {
 
 // VARIABLES
 $nombre = $isan = $anio = $valoracion = '';
-$mensajeError = '';
+$mensajeError = $mensajeErrorBorrar = '';
 
 // VARIABLES_DB
 $servername = "db";
@@ -28,35 +28,46 @@ if (isset($_SESSION['username'])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nombre = !empty($_POST['nombre']) ? $_POST['nombre'] : '';
-    $isan = !empty($_POST['ISAN']) ? $_POST['ISAN'] : '';
-    $anio = !empty($_POST['anio']) ? $_POST['anio'] : '';
-    $valoracion = !empty($_POST['puntuacion']) ? $_POST['puntuacion'] : '';
+    if (isset($_POST['agregar'])) {
+        $nombre = $_POST['nombre'];
+        $isan = $_POST['ISAN'];
+        $anio = $_POST['anio'];
+        $valoracion = $_POST['puntuacion'];
 
-    $nombreUsuario = $_SESSION['username'];
+        $nombreUsuario = $_SESSION['username'];
 
-    if (empty($isan) || strlen($isan) !== 8) {
-        $mensajeError = "El campo ISAN es obligatorio y debe tener exactamente 8 dígitos.";
-    }
+        if (empty($isan) || strlen($isan) !== 8) {
+            $mensajeError = "El campo ISAN es obligatorio y debe tener exactamente 8 dígitos.";
+        }
 
-    if (empty($anio)) {
-        $mensajeError .= "<br>El campo Año es obligatorio.";
-    }
+        if (empty($anio)) {
+            $mensajeError .= "<br>El campo Año es obligatorio.";
+        }
 
-    if (empty($valoracion)) {
-        $mensajeError .= "<br>El campo Puntuación es obligatorio.";
-    }
+        if (empty($valoracion)) {
+            $mensajeError .= "<br>El campo Puntuación es obligatorio.";
+        }
 
-    if (empty($mensajeError)) {
-        $sql_select_isan = "SELECT * FROM peliculasUsuario WHERE ISAN = '$isan'";
-        $result_select = $conn->query($sql_select_isan);
+        if (empty($mensajeError)) {
+            $sql_select_isan = "SELECT * FROM peliculasUsuario WHERE ISAN = '$isan'";
+            $result_select = $conn->query($sql_select_isan);
 
-        if ($result_select->num_rows == 0) {
-            insertarPelicula($conn, $nombreUsuario, $isan, $nombre, $valoracion, $anio);
-        } else {
-            actualizarPelicula($conn, $valoracion, $anio, $isan);
+            if ($result_select->num_rows == 0) {
+                insertarPelicula($conn, $nombreUsuario, $isan, $nombre, $valoracion, $anio);
+            } else {
+                actualizarPelicula($conn, $valoracion, $anio, $isan);
+            }
         }
     }
+    elseif (isset($_POST['borrar'])) {
+        $isan_borrar = $_POST['ISAN_borrar'];
+        if (empty($isan_borrar)) {
+            $mensajeErrorBorrar = 'El campo ISAN es obligatorio y debe tener exactamente 8 dígitos.';
+        } else {
+            borrarPelicula($conn, $isan_borrar);
+        }
+    }
+    
 }
 
 function insertarPelicula($conn, $nombreUsuario, $isan, $nombre, $valoracion, $anio) {
@@ -74,6 +85,15 @@ function actualizarPelicula($conn, $valoracion, $anio, $isan) {
         echo "Película actualizada correctamente";
     } else {
         echo "Error: " . $sql_update . "<br>" . $conn->error;
+    }
+}
+
+function borrarPelicula($conn, $isan) {
+    $sql_borrar = "DELETE FROM peliculasUsuario WHERE isan = '$isan'"; 
+    if ($conn->query($sql_borrar) === TRUE) {
+        echo "Película eliminada correctamente";
+    } else {
+        echo "Error: " . $sql_borrar . "<br>" . $conn->error;
     }
 }
 
@@ -137,8 +157,19 @@ function actualizarPelicula($conn, $valoracion, $anio, $isan) {
                     <td><input type="number" min="0" max="5" name="puntuacion" id="puntuacion" value="<?php echo htmlspecialchars($valoracion); ?>"></td>
                 </tr>
             </table>
-            <input type="submit" value="Agregar película">
+            <input type="submit" name="agregar" value="Agregar película">
         </form>
+        <h3>Borrar película</h3>
+        <?php if (!empty($mensajeErrorBorrar)) echo "<div class='error'>$mensajeErrorBorrar</div>"; ?>
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
+                <table>
+                    <tr>
+                        <td><label for="ISAN_borrar">ISAN: </label></td>
+                        <td><input type="text" name="ISAN_borrar" id="ISAN_borrar" value="<?php echo htmlspecialchars($isan); ?>"></td>
+                    </tr>
+                </table>
+                <input type="submit" name="borrar" value="Borrar película">
+        </form> 
     </div>
     <br><br>
     <a href="logout.php">Cerrar sesión</a>
